@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # サンプルサイズ決定について学習する目的
 
 
-def cal_ttest2_ss(alpha, power_want, d, n1_n2, tail_test):
+def samplesize_ttest2(alpha, power_want, d, n1_n2, tail_test):
     # 等分散の仮定
 
     # サンプルサイズ探索
@@ -24,16 +24,54 @@ def cal_ttest2_ss(alpha, power_want, d, n1_n2, tail_test):
             case 'upper-one-tailed': # 上側片側検定
                 t_a = t.ppf(1-alpha, df) # alpha点
                 power = 1 - nct.cdf(t_a, df, delta)
-            case 'lower-one-tailed': # 下側片側検定
-                t_a = t.ppf(1-alpha, df) # alpha点
-                power = nct.cdf(-t_a, df, delta)
+            #case 'lower-one-tailed': # 下側片側検定
+                #t_a = t.ppf(alpha, df) # alpha点
+                #power = nct.cdf(t_a, df, delta)
 
         # 検出力が設定した検定力より大きくなるまでサンプルサイズを探索
         if power >= power_want:
             break
         n2 += 1
-    
+
     return n1, n2, df, delta, t_a, power
+
+def show_samplesize_ttest2(df, delta, t_a, tail_test):
+    display_x = np.array([-4,8]) # x軸のlim
+
+    # t分布，非心t分布を描画
+    x = np.linspace(display_x[0], display_x[1],100)
+    plt.plot(x,t.pdf(x,df),color='red',label='t') # t分布，帰無仮説H0
+    plt.plot(x,nct.pdf(x,df,delta),'--',color='blue',label='noncentric-t') # 非心t分布，対立仮説H1
+
+    # 両側or片側検定
+    match tail_test:
+        case 'two-tailed': # 両側検定
+            x_t = np.linspace(t_a, display_x[1], 100)
+            y_t = t.pdf(x_t,df)
+            plt.fill_between(x_t, y_t, color='tab:red', ec='gray', alpha=0.2)
+            x_t = np.linspace(display_x[0], -t_a, 100)
+            y_t = t.pdf(x_t,df)
+            plt.fill_between(x_t, y_t, color='tab:red', ec='gray', alpha=0.2)
+        case 'upper-one-tailed': # 上側片側検定
+            x_t = np.linspace(t_a, display_x[1], 100)
+            y_t = t.pdf(x_t,df)
+            plt.fill_between(x_t, y_t, color='tab:red', ec='gray', alpha=0.2)
+        #case 'lower-one-tailed': # 下側片側検定
+            #x_t = np.linspace(display_x[0], -t_a, 100)
+            #y_t = t.pdf(x_t,df)
+            #plt.fill_between(x_t, y_t, color='tab:red', ec='gray', alpha=0.2)
+    
+    x_nt = np.linspace(display_x[0], t_a, 100)
+    y_nt = nct.pdf(x_nt,df,delta)
+    plt.fill_between(x_nt, y_nt, color='tab:blue', ec='gray', alpha=0.2)
+
+    plt.xlim(display_x[0],display_x[1])
+    plt.ylim(bottom=0)
+    plt.xlabel('x')
+    plt.ylabel('P(x)')
+    plt.legend()
+    plt.title(f"df={df}, t_alpha={np.round(t_a,3)}")
+    plt.show()
 
 # 指定する値
 alpha = 0.05 # 有意水準
@@ -42,32 +80,6 @@ d = 0.8 # 効果量
 n1_n2 = 1 # 2群のサンプルサイズの比率(n1/n2)
 tail_test = 'upper-one-tailed'
 
-[n1, n2, df, delta, t_a, power] = cal_ttest2_ss(alpha, power_want, d, n1_n2, tail_test)
+[n1, n2, df, delta, t_a, power] = samplesize_ttest2(alpha, power_want, d, n1_n2, tail_test)
+show_samplesize_ttest2(df, delta, t_a, tail_test)
 print(f"n1={n1}, n2={n2}, Power={power:.4f}, {t_a}")
-
-'''
-# figure：t分布と非心t分布，有意水準，上側alpha/2点など
-x = np.linspace(-4,8,100)
-plt.plot(x,t.pdf(x,df),color='red',label='t') # t分布，帰無仮説H0
-# 両側t検定
-x_t = np.linspace(t_a2, 8, 100)
-y_t = t.pdf(x_t,df)
-plt.fill_between(x_t, y_t, color='tab:red', ec='gray', alpha=0.2)
-x_t = np.linspace(-4, -t_a2, 100)
-y_t = t.pdf(x_t,df)
-plt.fill_between(x_t, y_t, color='tab:red', ec='gray', alpha=0.2)
-
-plt.plot(x,nct.pdf(x,df,delta),'--',color='blue',label='noncentric-t') # 非心t分布，対立仮説H1
-x_nt = np.linspace(-4, t_a2, 100)
-y_nt = nct.pdf(x_nt,df,delta)
-plt.fill_between(x_nt, y_nt, color='tab:blue', ec='gray', alpha=0.2)
-
-plt.xlim(-4,8)
-plt.ylim(bottom=0)
-plt.xlabel('x')
-plt.ylabel('P(x)')
-plt.legend()
-plt.title(f"df={df}, t_alpha/2={np.round(t_a2,3)}, (n1,n2)={n1,n2}, d={d}")
-plt.show()
-print(f"n1={n1}, n2={n2}, Power={power:.4f}")
-'''
