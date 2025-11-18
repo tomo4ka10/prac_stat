@@ -8,27 +8,32 @@ import matplotlib.pyplot as plt
 
 def cal_ttest2_ss(alpha, power_want, d, n1_n2, tail_test):
     # 等分散の仮定
+
     # サンプルサイズ探索
-    n1 = 2  # 最小値からスタート
+    n2 = 2  # 最小値からスタート
     while True:
-        n2 = int(round(n1 * n1_n2)) # n2を比率から求める
+        n1 = int(round(n2 * n1_n2)) # n2を比率から求める
         df = n1 + n2 - 2 # 自由度
         delta = d * np.sqrt(n1 * n2 / (n1 + n2)) # 非心パラメータ
-        t_a2 = t.ppf(1-alpha/2, df) # 上側alpha/2点
-
+        
         # 両側or片側検定
         match tail_test:
             case 'two-tailed': # 両側検定
-                power = 1 - nct.cdf(t_a2, df, delta) + nct.cdf(-t_a2, df, delta)
+                t_a = t.ppf(1-alpha/2, df) # alpha/2点
+                power = 1 - nct.cdf(t_a, df, delta) + nct.cdf(-t_a, df, delta)
             case 'upper-one-tailed': # 上側片側検定
-                power = 1 - nct.cdf(t_a2, df, delta)
+                t_a = t.ppf(1-alpha, df) # alpha点
+                power = 1 - nct.cdf(t_a, df, delta)
+            case 'lower-one-tailed': # 下側片側検定
+                t_a = t.ppf(1-alpha, df) # alpha点
+                power = nct.cdf(-t_a, df, delta)
 
-        # 検出力が設定した検定力より大きくなるまで
+        # 検出力が設定した検定力より大きくなるまでサンプルサイズを探索
         if power >= power_want:
             break
-        n1 += 1
+        n2 += 1
     
-    return n1, n2, df, delta, t_a2, power
+    return n1, n2, df, delta, t_a, power
 
 # 指定する値
 alpha = 0.05 # 有意水準
@@ -37,8 +42,8 @@ d = 0.8 # 効果量
 n1_n2 = 1 # 2群のサンプルサイズの比率(n1/n2)
 tail_test = 'upper-one-tailed'
 
-[n1, n2, df, delta, t_a2, power] = cal_ttest2_ss(alpha, power_want, d, n1_n2, tail_test)
-print(f"n1={n1}, n2={n2}, Power={power:.4f}, {t_a2}")
+[n1, n2, df, delta, t_a, power] = cal_ttest2_ss(alpha, power_want, d, n1_n2, tail_test)
+print(f"n1={n1}, n2={n2}, Power={power:.4f}, {t_a}")
 
 '''
 # figure：t分布と非心t分布，有意水準，上側alpha/2点など
