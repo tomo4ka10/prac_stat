@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # 母平均に差があるかないか検定をする際のサンプルサイズ決定について学習する目的で作った
 
 def samplesize_ttest2_means(alpha, power_want, d, n1_n2, tail_test):
-    # 等分散の仮定
+    # 等分散を仮定
 
     # サンプルサイズ探索
     n2 = 2  # 最小値からスタート
@@ -35,8 +35,10 @@ def samplesize_ttest2_means(alpha, power_want, d, n1_n2, tail_test):
 
     return n1, n2, df, delta, t_a, power
 
-def show_samplesize_ttest2(df, delta, t_a, tail_test):
+def show_samplesize_ttest2_means(df, delta, t_a, tail_test):
     display_x = np.array([-8,8]) # x軸のlim
+
+    fig, ax = plt.subplots()
 
     # t分布，非心t分布を描画
     x = np.linspace(display_x[0], display_x[1],100)
@@ -77,22 +79,26 @@ def show_samplesize_ttest2(df, delta, t_a, tail_test):
     plt.fill_between(x_t, y_t, color='tab:red', ec='gray', alpha=0.2)
     plt.fill_between(x_nt, y_nt, color='tab:blue', ec='gray', alpha=0.2)
 
+    # 棄却域における%点の図示
+    ax.axvline(x=t_a, label='t_a point')
+
     # 表示の設定
     plt.xlim(display_x[0],display_x[1])
     plt.ylim(bottom=0)
     plt.xlabel('x')
     plt.ylabel('P(x)')
     plt.legend()
-    plt.title(f"df={df}, t_alpha={np.round(t_a,3)}")
+    plt.title(f"t_alpha={np.round(t_a,3)}")
     plt.show()
 
+# ----実行----
 # 指定する値
 alpha = 0.05 # 有意水準
 power_want = 0.8 # 指定する検定力 
 d = 0.5 # 効果量(Cohen's d)：平均の差を標本標準偏差で割ったもの
 n1_n2 = 1 # 2群のサンプルサイズの比率(n1/n2)
-tail_test = 'lower-one-tailed'
+tail_test = 'lower-one-tailed' # 検定方法（two-tailed/upper-one-tailed/lower-one-tailed）
 
 [n1, n2, df, delta, t_a, power] = samplesize_ttest2_means(alpha, power_want, d, n1_n2, tail_test)
-show_samplesize_ttest2(df, delta, t_a, tail_test)
+show_samplesize_ttest2_means(df, delta, t_a, tail_test)
 print(f"n1={n1}, n2={n2}, Power={power:.4f}, {t_a}")
