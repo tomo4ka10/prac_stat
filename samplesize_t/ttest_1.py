@@ -46,11 +46,7 @@ def show_samplesize_ttest1_means(df, delta, t_a, tail_test):
     match tail_test:
         case 'two-tailed': # 両側検定
             # t分布
-            # 右側
-            x_t = np.linspace(t_a, display_x[1], 100)
-            y_t = t.pdf(x_t,df)
-            # 左側
-            x_t = np.linspace(display_x[0], -t_a, 100)
+            x_t = np.concatenate([np.linspace(display_x[0], -t_a, 200),[np.nan],np.linspace(t_a, display_x[1], 200)]) # 左右を連結
             y_t = t.pdf(x_t,df)
             # 非心t分布
             x_nt = np.linspace(display_x[0], t_a, 100)
