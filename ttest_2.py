@@ -2,12 +2,12 @@ import numpy as np
 from scipy.stats import t,nct
 import matplotlib.pyplot as plt
 
-# 独立した2標本のt検定において有意水準や検定力，効果量からサンプルサイズを決定するコード
+# 2標本のt検定において有意水準や検定力，効果量からサンプルサイズを決定するコード
 # 母平均に差があるかないか検定をする際のサンプルサイズ決定について学習する目的で作った
 
 def samplesize_ttest2_means(alpha, power_want, d, n1_n2, tail_test):
     # 等分散を仮定
-
+    # 独立した2標本のt検定
     # サンプルサイズ探索
     n2 = 2  # 最小値からスタート
     while True:
@@ -97,8 +97,9 @@ alpha = 0.05 # 有意水準
 power_want = 0.8 # 指定する検定力 
 d = 0.5 # 効果量(Cohen's d)：平均の差を標本標準偏差で割ったもの
 n1_n2 = 1 # 2群のサンプルサイズの比率(n1/n2)
-tail_test = 'lower-one-tailed' # 検定方法（two-tailed/upper-one-tailed/lower-one-tailed）
+tail_test = 'two-tailed' # 検定方法（two-tailed/upper-one-tailed/lower-one-tailed）
 
 [n1, n2, df, delta, t_a, power] = samplesize_ttest2_means(alpha, power_want, d, n1_n2, tail_test)
 show_samplesize_ttest2_means(df, delta, t_a, tail_test)
-print(f"n1={n1}, n2={n2}, Power={power:.4f}, {t_a}")
+print(f"n1={n1},n2={n2}, Actual Power={power:.4f}, Critical t:{t_a:.4f}, δ:{delta:.4f}")
+
